@@ -78,7 +78,7 @@ window.addEventListener('load', function() {
       deviceInput.style.background = '#090';
       board.systemReset();
       board.samplingInterval = 250;
-      car = getToyCar(board, 6, 7, 8, 9);
+      car = getToyCar(board, 13, 12, 14, 16);
       console.log('ok');
       board.on('error', function(err) {
         board.error = err;
