@@ -1,0 +1,308 @@
+<!doctype html>
+<!--
+Created using JS Bin
+http://bin.webduino.io
+
+Copyright (c) 2017 by anonymous (http://bin.webduino.io/xemuj/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>火星任務遙控器</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="https://webduino.io/components/webduino-js/dist/webduino-all.min.js"></script>
+  <script src="https://blockly.webduino.io/webduino-blockly.js"></script>
+  <script src="https://blockly.webduino.io/lib/firebase.js"></script>
+  <script src="https://blockly.webduino.io/lib/runtime.min.js"></script>
+<style id="jsbin-css">
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:0;
+  font-family:'Verdana';
+  background:#333;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background:#fff;
+}
+header{
+  position:fixed;
+  height:40px;
+  background:#000;
+  width:120px;
+  right:0;
+  top:0;
+  color:#fff;
+  z-index:99;
+  text-align: center;
+  line-height: 40px;
+  font-size:18px;
+}
+.deviceArea{
+  position:absolute;
+  right:10px;
+  top:-2px;
+}
+.deviceInput{
+  width:40px;
+  border:none;
+  outline:none;
+  background:#666;
+  padding:2px 3px 3px;
+  margin:0 5px;
+}
+.deviceBtn{
+  border:none;
+  outline:none;
+  background:#666;
+  margin:0;
+}
+div{
+  z-index:2;
+}
+#bg{
+  width:100%;
+  height:calc(100% + 40px);
+  position:fixed;
+  bottom:-40px;
+  z-index:1;
+  background-image: url(https://lh3.googleusercontent.com/-axih1ezTBZk/VYJyraFTlMI/AAAAAAABH-4/RbL6j3myoiY/s000/control.jpg);
+  background-size: 200%;
+  background-repeat:no-repeat;
+  background-position: left bottom;
+}
+
+#show{
+  /* background-image:url(https://lh3.googleusercontent.com/-qbPeem4w5Mw/VYEoVlHKmMI/AAAAAAABH-I/Y6k66Gz7Tr0/s000/a1.jpg); */
+  width:200px;
+  height:200px;
+  background-size:cover;
+  margin:20px auto 0 ;
+}
+#show.n{
+  display:none;
+}
+#show.f{
+  -webkit-transform:rotate(0deg);
+}
+#show.b{
+  -webkit-transform:rotate(180deg);
+}
+#show.l{
+  -webkit-transform:rotate(90deg);
+}
+#show.r{
+  -webkit-transform:rotate(-90deg);
+}
+#show.fl{
+  -webkit-transform:rotate(45deg);
+}
+#show.fr{
+  -webkit-transform:rotate(-45deg);
+}
+#show.bl{
+  -webkit-transform:rotate(135deg);
+}
+#show.br{
+  -webkit-transform:rotate(225deg);
+}
+
+#f{
+  opacity:.4;
+  position:absolute;
+  left:0;
+  width:35%;
+  border:1px dashed #fff;
+}
+#b{
+  opacity:.4;
+  position:absolute;
+  bottom:0;
+  left:0;
+  width:35%;
+  border:1px dashed #fff;
+}
+#r{
+  opacity:.4;
+  position:absolute;
+  bottom:0;
+  right:0;
+  width:21%;
+  border:1px dashed #fff;
+}
+#l{
+  opacity:.4;
+  position:absolute;
+  bottom:0;
+  right:21%;
+  width:18%;
+  border:1px dashed #fff;
+}
+#bubu{
+  width:20%;
+  height: 100%;
+  background:none;
+  position:absolute;
+  bottom:0;
+}
+</style>
+</head>
+
+<body>
+    <header>
+    <div class="deviceArea">
+        <input type="text" class="deviceInput" value="10vQ3nmV"><button class="deviceBtn">設定</button>
+      </div>
+    </header>
+  <div id="f"></div>
+  <div id="b"></div>
+  <div id="l"></div>
+  <div id="r"></div>
+  <div id="bubu"></div>
+
+  <div id="bg"></div>
+<script id="jsbin-javascript">
+// var car;
+
+window.addEventListener('load', function() {
+  //     var  board = document.getElementById('board'),
+    var body = document.getElementById('body'),
+    F = document.getElementById('f'),
+    B = document.getElementById('b'),
+    L = document.getElementById('l'),
+    R = document.getElementById('r'),
+    show = document.getElementById('show'),
+    bubu = document.getElementById('bubu'),
+    bg = document.getElementById('bg'),
+    cf = 0,
+    cb = 0,
+    cl = 0,
+    cr = 0,
+    w = window;
+
+    var deviceID;
+
+  var deviceInput = document.querySelector('.deviceInput');
+  var deviceBtn = document.querySelector('.deviceBtn');
+
+  if (localStorage.toyCarDeviceId) {
+    deviceInput.value = localStorage.toyCarDeviceId;
+  }
+
+  F.style.height = (w.innerWidth / 3.2 - 40) + 'px';
+  F.style.bottom = ((w.innerWidth / 3.2) - 35) + 'px';
+  B.style.height = ((w.innerWidth / 3.2) - 40) + 'px';
+  L.style.height = w.innerWidth / 4 * 2 + 'px';
+  R.style.height = w.innerWidth / 4 * 2 + 'px';
+  bubu.style.left = (w.innerWidth / 2 - bubu.offsetWidth/1.8) + 'px';
+
+  window.addEventListener('resize', rs);
+
+  var car, car2, timer, state = 0;
+
+deviceBtn.onclick = function() {
+  deviceId = deviceInput.value;
+    deviceInput.style.background = '#555';
+    localStorage.toyCarDeviceId = deviceId;
+    timer = setTimeout(function(){
+      if(state === 0){
+        deviceInput.style.background = '#f00';
+      }
+    },5000);
+
+boardReady({board: 'Smart', device: deviceId, transport: 'mqtt'}, function (board) {
+        state=1;
+      deviceInput.style.background = '#090';
+  board.systemReset();
+  board.samplingInterval = 50;
+  car  = getToyCar(board,13,12,14,5);
+  car2 = getToyCar(board,0,4,16,16);
+
+
+
+      controllerBtnEvent(F, ["mousedown", "touchstart"], function() {
+        car.goFront();
+        bg.style.backgroundPosition = 'right bottom';
+      });
+      controllerBtnEvent(B, ["mousedown", "touchstart"], function() {
+        car.goBack();
+        bg.style.backgroundPosition = 'right bottom';
+      });
+      controllerBtnEvent(L, ["mousedown", "touchstart"], function() {
+        car.turnLeft();
+        bg.style.backgroundPosition = 'right bottom';
+      });
+      controllerBtnEvent(R, ["mousedown", "touchstart"], function() {
+        car.turnRight();
+        bg.style.backgroundPosition = 'right bottom';
+      });
+      controllerBtnEvent(F, ["mouseup", "touchend"], function() {
+        car.stop();
+        bg.style.backgroundPosition = 'left bottom';
+      });
+      controllerBtnEvent(B, ["mouseup", "touchend"], function() {
+        car.stop();
+        bg.style.backgroundPosition = 'left bottom';
+      });
+      controllerBtnEvent(L, ["mouseup", "touchend"], function() {
+        car.stop();
+        bg.style.backgroundPosition = 'left bottom';
+      });
+      controllerBtnEvent(R, ["mouseup", "touchend"], function() {
+        car.stop();
+        bg.style.backgroundPosition = 'left bottom';
+      });
+
+      controllerBtnEvent(bubu, ["mousedown", "touchstart"], function() {
+        car2.goFront();
+        bg.style.backgroundPosition = 'right bottom';
+      });
+      controllerBtnEvent(bubu, ["mouseup", "touchend"], function() {
+        car2.stop();
+        bg.style.backgroundPosition = 'left bottom';
+      });
+});
+}; // deviceBtn.onclick
+
+
+  function controllerBtnEvent(c, e, callback) {
+    if (e != "click") {
+      var _u = navigator.userAgent;
+      if (_u.indexOf("Android") > -1 || _u.indexOf("iPhone") > -1 || _u.indexOf("iPad") > -1) {
+        c.addEventListener(e[1], function() {
+          callback();
+        });
+      } else {
+        c.addEventListener(e[0], function() {
+          callback();
+        });
+      }
+    } else {
+      c.addEventListener("click", function() {
+        callback();
+      });
+    }
+  }
+
+  function rs() {
+    F.style.height = (w.innerWidth / 3.2 - 40) + 'px';
+    F.style.bottom = ((w.innerWidth / 3.2) - 35) + 'px';
+    B.style.height = ((w.innerWidth / 3.2) - 40) + 'px';
+    L.style.height = w.innerWidth / 4 * 2 + 'px';
+    R.style.height = w.innerWidth / 4 * 2 + 'px';
+    bubu.style.left = (w.innerWidth / 2 - bubu.offsetWidth/1.8) + 'px';
+  }
+
+  });
+</script>
+</body>
+
+  </html>
