@@ -228,6 +228,8 @@ boardReady({board: 'Smart', device: deviceId, transport: 'mqtt'}, function (boar
 
   car.setRightSpeed(70);
   car.setLeftSpeed(70);
+  car2.setRightSpeed(50);
+  car2.setLeftSpeed(50);
 
       controllerBtnEvent(F, ["mousedown", "touchstart"], function() {
         car.goFront();
