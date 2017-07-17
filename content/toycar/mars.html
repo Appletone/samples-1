@@ -224,7 +224,7 @@ boardReady({board: 'Smart', device: deviceId, transport: 'mqtt'}, function (boar
   board.systemReset();
   board.samplingInterval = 50;
   car  = getToyCar(board,13,12,14,5);
-  car2 = getToyCar(board,0,4,16,16);
+  car2 = getToyCar(board,16,16,0,4);
 
   car.setRightSpeed(70);
   car.setLeftSpeed(70);
