@@ -226,6 +226,8 @@ boardReady({board: 'Smart', device: deviceId, transport: 'mqtt'}, function (boar
   car  = getToyCar(board,13,12,14,5);
   car2 = getToyCar(board,0,4,16,16);
 
+  car2.stop(); // magic
+
   car.setRightSpeed(70);
   car.setLeftSpeed(70);
   car2.setRightSpeed(50);
